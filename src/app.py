@@ -39,16 +39,10 @@ if response.status_code == 200:
     # Parsear el HTML
     soup = BeautifulSoup(response.text, 'html.parser')
     
-    # Buscar todas las tablas en la página
     tables = soup.find_all('table')
+    table = tables[0] 
     
-    # Seleccionamos la tabla que deseas, en este caso la primera tabla
-    table = tables[0]  # Si deseas una tabla diferente, cambia el índice, ej. tables[1] para la segunda
-    
-    # Obtener todas las filas de la tabla (<tr>)
     rows = table.find_all('tr')
-    
-    # Crear una lista para almacenar los datos extraídos
     table_data = []
     
     # Iterar sobre las filas de la tabla 
@@ -60,7 +54,6 @@ if response.status_code == 200:
             row_data = [cell.text.strip() for cell in cells]  # Extraer el texto de cada celda
             table_data.append(row_data) 
        
-    # Mostrar los datos extraídos
     for data in table_data:
         print(data)
 else:
@@ -68,19 +61,13 @@ else:
 
  
 ds=pd.DataFrame(table_data)
-ds
 
-
-# limpia las filas para obtener los valores limpios eliminando $ y B. Elimina también vacías o no tengan información.
-ds.head()
 # Renombrar las columnas
 ds.columns = ['Year', 'Revenue', 'change']  
 # cambiatr a tipo string pq el metodo str no me deja acceder si no es str
 ds['Revenue'] = ds['Revenue'].astype(str)
-
 ds["Revenue"] = ds["Revenue"].str.replace('$', '').str.replace(' B', '').astype(float)
 ds
-
 
 
 import requests
@@ -93,7 +80,6 @@ url = "https://companies-market-cap-copy.vercel.app/earnings.html"
 response = requests.get(url)
 if response.status_code == 200:
     print("Petición exitosa, código:", response.status_code)
-
     # Crear el objeto BeautifulSoup
     soup = BeautifulSoup(response.text, "html.parser")
 
@@ -111,38 +97,18 @@ if response.status_code == 200:
                 beneficios.append(row_data)  
 
         # Crear un DataFrame con los datos extraídos
-        df = pd.DataFrame(beneficios, columns=["Año", "Beneficio", "Evolución"])
-        
+        df_beneficios = pd.DataFrame(beneficios, columns=["Año", "Beneficio", "Evolución"])
+       
+            # Mostrar el DataFrame de beneficios
+            print("\nDataset de beneficios:")
+            print(df_beneficios.head())
 else:
     print(f"Error en la solicitud: {response.status_code}")
 
-print(df.head())
 
-ultimo_año = df.iloc[0] 
+ultimo_año = df_beneficios.iloc[0] 
+
 print(f"Los beneficios del último año ({ultimo_año['Año']}) fueron: {ultimo_año['Beneficio']}")
-  
 
-
-import json
-
-# Ruta del archivo fuente (explore.es.ipynb)
-origen = '/workspaces/FINAROSALINA_web-scraping-project-tutorial/src/explore.es.ipynb'
-
-# Ruta de destino (app.py)
-destino = '/workspaces/FINAROSALINA_web-scraping-project-tutorial/src/app.py'
-
-# Abrir el archivo .ipynb y cargar su contenido como JSON
-with open(origen, 'r') as file:
-    contenido = json.load(file)
-
-# Extraer solo las celdas de tipo 'code' del cuaderno
-celdas_de_codigo = [cell['source'] for cell in contenido['cells'] if cell['cell_type'] == 'code']
-
-# Unir todo el código en un solo bloque
-codigo_completo = "\n\n".join(["".join(celda) for celda in celdas_de_codigo])
-
-# Abrir el archivo app.py y escribir el código extraído
-with open(destino, 'w') as file:
-    file.write(codigo_completo)
-
-print(f"Código copiado de {origen} a {destino}")
+# guardar en csv
+df.to_csv('company_revenue_dataset.csv', index=False)
