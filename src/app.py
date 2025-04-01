@@ -100,8 +100,8 @@ if response.status_code == 200:
         df_beneficios = pd.DataFrame(beneficios, columns=["Año", "Beneficio", "Evolución"])
        
             # Mostrar el DataFrame de beneficios
-            print("\nDataset de beneficios:")
-            print(df_beneficios.head())
+        print("\nDataset de beneficios:")
+        print(df_beneficios.head())
 else:
     print(f"Error en la solicitud: {response.status_code}")
 
